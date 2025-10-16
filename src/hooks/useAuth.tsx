@@ -70,6 +70,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (profileError) throw profileError;
       setProfile(profileData);
 
+      // Check if this is the admin email
+      const isAdminEmail = profileData.email === "rathermutaib333@gmail.com";
+
       // Fetch role
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
@@ -79,7 +82,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (roleError) {
         console.log("No role found for user");
-        setUserRole(null);
+        
+        // Auto-assign admin role if this is the admin email
+        if (isAdminEmail) {
+          const { error: insertError } = await supabase
+            .from("user_roles")
+            .insert([{ user_id: userId, role: "admin" }]);
+          
+          if (!insertError) {
+            setUserRole("admin");
+          } else {
+            console.error("Error assigning admin role:", insertError);
+            setUserRole(null);
+          }
+        } else {
+          setUserRole(null);
+        }
       } else {
         setUserRole(roleData.role);
       }
@@ -93,7 +111,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (email: string, password: string, namaLengkap: string, nimNip: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -104,12 +122,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       },
     });
 
-    if (!error && user) {
+    if (!error && data.user) {
       // Update profile with NIM/NIP
       await supabase
         .from("profiles")
         .update({ nim_nip: nimNip })
-        .eq("id", user.id);
+        .eq("id", data.user.id);
     }
 
     return { error };

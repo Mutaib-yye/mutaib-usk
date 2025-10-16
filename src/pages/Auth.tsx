@@ -84,9 +84,18 @@ const Auth = () => {
     setLoading(false);
 
     if (error) {
-      toast.error("Pendaftaran gagal: " + error.message);
+      if (error.message.includes("already registered")) {
+        toast.error("Email sudah terdaftar. Silakan login.");
+      } else {
+        toast.error("Pendaftaran gagal: " + error.message);
+      }
     } else {
       toast.success("Pendaftaran berhasil! Silakan login.");
+      // Clear form and switch to login tab
+      setSignupEmail("");
+      setSignupPassword("");
+      setNamaLengkap("");
+      setNimNip("");
     }
   };
 
