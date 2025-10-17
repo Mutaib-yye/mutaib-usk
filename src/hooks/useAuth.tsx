@@ -82,21 +82,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (roleError) {
         console.log("No role found for user");
-        
-        // Auto-assign admin role if this is the admin email
+        setUserRole(null);
+        // If this is the admin email, re-check shortly (trigger/backfill may still be running)
         if (isAdminEmail) {
-          const { error: insertError } = await supabase
-            .from("user_roles")
-            .insert([{ user_id: userId, role: "admin" }]);
-          
-          if (!insertError) {
-            setUserRole("admin");
-          } else {
-            console.error("Error assigning admin role:", insertError);
-            setUserRole(null);
-          }
-        } else {
-          setUserRole(null);
+          setTimeout(async () => {
+            const { data: retryRole } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", userId)
+              .single();
+            if (retryRole?.role) setUserRole(retryRole.role);
+          }, 1200);
         }
       } else {
         setUserRole(roleData.role);

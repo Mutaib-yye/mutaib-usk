@@ -67,7 +67,7 @@ const Index = () => {
           <GraduationCap className="w-14 h-14 text-primary-foreground" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold">Sistem Informasi Perkuliahan</h1>
+          <h1 className="text-3xl font-bold">Sistem Informasi Perkuliahan - Universitas Syiah Kuala</h1>
           <p className="text-muted-foreground flex items-center justify-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
             Memuat aplikasi...
