@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +26,7 @@ const signupSchema = z.object({
 
 const Auth = () => {
   const { signIn, signUp, user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -57,9 +60,9 @@ const Auth = () => {
     setLoading(false);
 
     if (error) {
-      toast.error("Login gagal: " + error.message);
+      toast.error(t("auth.loginFailed") + ": " + error.message);
     } else {
-      toast.success("Login berhasil!");
+      toast.success(t("auth.loginSuccess"));
       navigate("/");
     }
   };
@@ -85,12 +88,12 @@ const Auth = () => {
 
     if (error) {
       if (error.message.includes("already registered")) {
-        toast.error("Email sudah terdaftar. Silakan login.");
+        toast.error(t("auth.emailExists"));
       } else {
-        toast.error("Pendaftaran gagal: " + error.message);
+        toast.error(t("auth.signupFailed") + ": " + error.message);
       }
     } else {
-      toast.success("Pendaftaran berhasil! Silakan login.");
+      toast.success(t("auth.signupSuccess"));
       // Clear form and switch to login tab
       setSignupEmail("");
       setSignupPassword("");
@@ -101,29 +104,33 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 via-background to-secondary/20 p-4">
+      <div className="absolute top-4 right-4">
+        <LanguageToggle />
+      </div>
+      
       <Card className="w-full max-w-md shadow-xl border-primary/20">
         <CardHeader className="text-center space-y-3">
           <div className="mx-auto bg-primary rounded-full w-20 h-20 flex items-center justify-center shadow-lg">
             <GraduationCap className="w-12 h-12 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl font-bold text-secondary">
-            Universitas Syiah Kuala
+            {t("university.name")}
           </CardTitle>
           <CardDescription className="text-base font-medium">
-            Sistem Informasi Perkuliahan
+            {t("university.system")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Masuk</TabsTrigger>
-              <TabsTrigger value="signup">Daftar</TabsTrigger>
+              <TabsTrigger value="login">{t("auth.login")}</TabsTrigger>
+              <TabsTrigger value="signup">{t("auth.signup")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
+                  <Label htmlFor="login-email">{t("auth.email")}</Label>
                   <Input
                     id="login-email"
                     type="email"
@@ -134,7 +141,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
+                  <Label htmlFor="login-password">{t("auth.password")}</Label>
                   <Input
                     id="login-password"
                     type="password"
@@ -145,7 +152,7 @@ const Auth = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Memproses..." : "Masuk"}
+                  {loading ? t("auth.processing") : t("auth.login")}
                 </Button>
               </form>
             </TabsContent>
@@ -153,7 +160,7 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">{t("auth.email")}</Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -164,29 +171,29 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nama-lengkap">Nama Lengkap</Label>
+                  <Label htmlFor="nama-lengkap">{t("auth.fullName")}</Label>
                   <Input
                     id="nama-lengkap"
                     type="text"
-                    placeholder="Masukkan nama lengkap"
+                    placeholder={t("auth.fullName")}
                     value={namaLengkap}
                     onChange={(e) => setNamaLengkap(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nim-nip">NIM/NIP</Label>
+                  <Label htmlFor="nim-nip">{t("auth.nimNip")}</Label>
                   <Input
                     id="nim-nip"
                     type="text"
-                    placeholder="Masukkan NIM atau NIP"
+                    placeholder={t("auth.nimNip")}
                     value={nimNip}
                     onChange={(e) => setNimNip(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password">{t("auth.password")}</Label>
                   <Input
                     id="signup-password"
                     type="password"
@@ -197,7 +204,7 @@ const Auth = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Memproses..." : "Daftar"}
+                  {loading ? t("auth.processing") : t("auth.signup")}
                 </Button>
               </form>
             </TabsContent>

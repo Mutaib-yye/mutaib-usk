@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +20,8 @@ const nilaiSchema = z.object({
 });
 
 const DosenDashboard = () => {
-  const { signOut, profile, user } = useAuth();
+  const { signOut, user } = useAuth();
+  const { t } = useLanguage();
   const [mataKuliah, setMataKuliah] = useState<any[]>([]);
   const [mahasiswa, setMahasiswa] = useState<any[]>([]);
   const [nilai, setNilai] = useState<any[]>([]);
@@ -98,7 +101,7 @@ const DosenDashboard = () => {
     }
 
     if (!selectedMahasiswa || !selectedMataKuliah) {
-      toast.error("Pilih mahasiswa dan mata kuliah");
+      toast.error(t("admin.saveFailed"));
       return;
     }
 
@@ -131,9 +134,9 @@ const DosenDashboard = () => {
     setLoading(false);
 
     if (error) {
-      toast.error("Gagal menyimpan nilai: " + error.message);
+      toast.error(t("admin.saveFailed") + ": " + error.message);
     } else {
-      toast.success(editingNilai ? "Nilai berhasil diperbarui!" : "Nilai berhasil ditambahkan!");
+      toast.success(t("admin.saveSuccess"));
       setDialogOpen(false);
       resetForm();
       fetchNilai();
@@ -163,14 +166,17 @@ const DosenDashboard = () => {
           <div className="flex items-center gap-3">
             <GraduationCap className="w-8 h-8" />
             <div>
-              <h1 className="text-xl font-bold">Universitas Syiah Kuala</h1>
-              <p className="text-sm opacity-90">Dashboard Dosen</p>
+              <h1 className="text-xl font-bold">{t("university.name")}</h1>
+              <p className="text-sm opacity-90">{t("dosen.dashboard")}</p>
             </div>
           </div>
-          <Button onClick={signOut} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-            <LogOut className="w-4 h-4 mr-2" />
-            Keluar
-          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageToggle />
+            <Button onClick={signOut} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <LogOut className="w-4 h-4 mr-2" />
+              {t("common.logout")}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -181,7 +187,7 @@ const DosenDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <BookOpen className="w-5 h-5 text-accent" />
-                Mata Kuliah
+                {t("dosen.courses")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -193,7 +199,7 @@ const DosenDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <GraduationCap className="w-5 h-5 text-primary" />
-                Mahasiswa
+                {t("dosen.students")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -205,7 +211,7 @@ const DosenDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Edit className="w-5 h-5 text-success" />
-                Nilai Diinput
+                {t("dosen.gradesEntered")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -219,8 +225,8 @@ const DosenDashboard = () => {
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle>Daftar Nilai</CardTitle>
-                <CardDescription>Input dan kelola nilai mahasiswa</CardDescription>
+                <CardTitle>{t("dosen.gradeList")}</CardTitle>
+                <CardDescription>{t("dosen.manageStudentGrades")}</CardDescription>
               </div>
               <Dialog open={dialogOpen} onOpenChange={(open) => {
                 setDialogOpen(open);
@@ -229,27 +235,27 @@ const DosenDashboard = () => {
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="w-4 h-4 mr-2" />
-                    Input Nilai
+                    {t("dosen.inputGrade")}
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="bg-card z-50">
                   <DialogHeader>
                     <DialogTitle>
-                      {editingNilai ? "Edit Nilai" : "Input Nilai"}
+                      {editingNilai ? t("dosen.editGrade") : t("dosen.inputGrade")}
                     </DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleSaveNilai} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="mahasiswa">Mahasiswa</Label>
+                      <Label htmlFor="mahasiswa">{t("dosen.student")}</Label>
                       <Select 
                         value={selectedMahasiswa} 
                         onValueChange={setSelectedMahasiswa}
                         disabled={!!editingNilai}
                       >
                         <SelectTrigger id="mahasiswa">
-                          <SelectValue placeholder="Pilih mahasiswa" />
+                          <SelectValue placeholder={t("dosen.selectStudent")} />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-card z-50">
                           {mahasiswa.map((mhs) => (
                             <SelectItem key={mhs.id} value={mhs.id}>
                               {mhs.nama_lengkap} - {mhs.nim_nip}
@@ -259,16 +265,16 @@ const DosenDashboard = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="mata-kuliah">Mata Kuliah</Label>
+                      <Label htmlFor="mata-kuliah">{t("dosen.course")}</Label>
                       <Select 
                         value={selectedMataKuliah} 
                         onValueChange={setSelectedMataKuliah}
                         disabled={!!editingNilai}
                       >
                         <SelectTrigger id="mata-kuliah">
-                          <SelectValue placeholder="Pilih mata kuliah" />
+                          <SelectValue placeholder={t("dosen.selectCourse")} />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-card z-50">
                           {mataKuliah.map((mk) => (
                             <SelectItem key={mk.id} value={mk.id}>
                               {mk.kode_mk} - {mk.nama_mata_kuliah}
@@ -278,7 +284,7 @@ const DosenDashboard = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="nilai-angka">Nilai (0-100)</Label>
+                      <Label htmlFor="nilai-angka">{t("dosen.gradeNumber")}</Label>
                       <Input
                         id="nilai-angka"
                         type="number"
@@ -289,11 +295,11 @@ const DosenDashboard = () => {
                         required
                       />
                       <p className="text-sm text-muted-foreground">
-                        Nilai huruf: <strong>{hitungNilaiHuruf(nilaiAngka)}</strong>
+                        {t("dosen.gradeLetter")}: <strong>{hitungNilaiHuruf(nilaiAngka)}</strong>
                       </p>
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Menyimpan..." : editingNilai ? "Perbarui" : "Simpan"}
+                      {loading ? t("admin.saving") : editingNilai ? t("admin.update") : t("common.save")}
                     </Button>
                   </form>
                 </DialogContent>
@@ -304,12 +310,12 @@ const DosenDashboard = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Mahasiswa</TableHead>
-                  <TableHead>NIM</TableHead>
-                  <TableHead>Mata Kuliah</TableHead>
-                  <TableHead>Nilai Angka</TableHead>
-                  <TableHead>Nilai Huruf</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+                  <TableHead>{t("dosen.student")}</TableHead>
+                  <TableHead>{t("dosen.nim")}</TableHead>
+                  <TableHead>{t("dosen.course")}</TableHead>
+                  <TableHead>{t("mahasiswa.gradeNumber")}</TableHead>
+                  <TableHead>{t("mahasiswa.gradeLetter")}</TableHead>
+                  <TableHead className="text-right">{t("admin.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

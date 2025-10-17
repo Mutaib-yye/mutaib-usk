@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +23,8 @@ const mataKuliahSchema = z.object({
 });
 
 const AdminDashboard = () => {
-  const { signOut, profile } = useAuth();
+  const { signOut } = useAuth();
+  const { t } = useLanguage();
   const [mataKuliah, setMataKuliah] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,7 +54,7 @@ const AdminDashboard = () => {
       .order("semester", { ascending: true });
 
     if (error) {
-      toast.error("Gagal memuat data mata kuliah");
+      toast.error(t("admin.saveFailed"));
     } else {
       setMataKuliah(data || []);
     }
@@ -66,7 +69,7 @@ const AdminDashboard = () => {
       `);
 
     if (error) {
-      toast.error("Gagal memuat data pengguna");
+      toast.error(t("admin.saveFailed"));
     } else {
       setUsers(profilesData || []);
     }
@@ -111,9 +114,9 @@ const AdminDashboard = () => {
     setLoading(false);
 
     if (error) {
-      toast.error("Gagal menyimpan mata kuliah: " + error.message);
+      toast.error(t("admin.saveFailed") + ": " + error.message);
     } else {
-      toast.success(editingMk ? "Mata kuliah berhasil diperbarui!" : "Mata kuliah berhasil ditambahkan!");
+      toast.success(t("admin.saveSuccess"));
       setDialogOpen(false);
       resetForm();
       fetchMataKuliah();
@@ -121,7 +124,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteMataKuliah = async (id: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus mata kuliah ini?")) return;
+    if (!confirm(t("admin.deleteConfirm"))) return;
 
     const { error } = await supabase
       .from("mata_kuliah")
@@ -129,9 +132,9 @@ const AdminDashboard = () => {
       .eq("id", id);
 
     if (error) {
-      toast.error("Gagal menghapus mata kuliah");
+      toast.error(t("admin.deleteFailed"));
     } else {
-      toast.success("Mata kuliah berhasil dihapus!");
+      toast.success(t("admin.deleteSuccess"));
       fetchMataKuliah();
     }
   };
@@ -149,7 +152,7 @@ const AdminDashboard = () => {
     e.preventDefault();
 
     if (!selectedUserId || !selectedRole) {
-      toast.error("Pilih pengguna dan role");
+      toast.error(t("admin.saveFailed"));
       return;
     }
 
@@ -177,9 +180,9 @@ const AdminDashboard = () => {
     setLoading(false);
 
     if (error) {
-      toast.error("Gagal menetapkan role: " + error.message);
+      toast.error(t("admin.saveFailed") + ": " + error.message);
     } else {
-      toast.success("Role berhasil ditetapkan!");
+      toast.success(t("admin.saveSuccess"));
       setUserDialogOpen(false);
       setSelectedUserId("");
       setSelectedRole("");
@@ -203,14 +206,17 @@ const AdminDashboard = () => {
           <div className="flex items-center gap-3">
             <GraduationCap className="w-8 h-8" />
             <div>
-              <h1 className="text-xl font-bold">Universitas Syiah Kuala</h1>
-              <p className="text-sm opacity-90">Dashboard Admin</p>
+              <h1 className="text-xl font-bold">{t("university.name")}</h1>
+              <p className="text-sm opacity-90">{t("admin.dashboard")}</p>
             </div>
           </div>
-          <Button onClick={signOut} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-            <LogOut className="w-4 h-4 mr-2" />
-            Keluar
-          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageToggle />
+            <Button onClick={signOut} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <LogOut className="w-4 h-4 mr-2" />
+              {t("common.logout")}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -221,7 +227,7 @@ const AdminDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary" />
-                Total Mata Kuliah
+                {t("admin.totalCourses")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -233,7 +239,7 @@ const AdminDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-accent" />
-                Total Pengguna
+                {t("admin.totalUsers")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -247,8 +253,8 @@ const AdminDashboard = () => {
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle>Daftar Mata Kuliah</CardTitle>
-                <CardDescription>Kelola mata kuliah yang tersedia</CardDescription>
+                <CardTitle>{t("admin.courseList")}</CardTitle>
+                <CardDescription>{t("admin.manageCoursesList")}</CardDescription>
               </div>
               <Dialog open={dialogOpen} onOpenChange={(open) => {
                 setDialogOpen(open);
@@ -257,62 +263,61 @@ const AdminDashboard = () => {
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="w-4 h-4 mr-2" />
-                    Tambah Mata Kuliah
+                    {t("admin.addCourse")}
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="bg-card z-50">
                   <DialogHeader>
                     <DialogTitle>
-                      {editingMk ? "Edit Mata Kuliah" : "Tambah Mata Kuliah"}
+                      {editingMk ? t("admin.editCourse") : t("admin.addCourse")}
                     </DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleSaveMataKuliah} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="kode-mk">Kode Mata Kuliah</Label>
+                      <Label htmlFor="kode-mk">{t("admin.courseCode")}</Label>
                       <Input
                         id="kode-mk"
                         value={kodeMk}
                         onChange={(e) => setKodeMk(e.target.value)}
-                        placeholder="contoh: TIF101"
+                        placeholder="TIF101"
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="nama-mk">Nama Mata Kuliah</Label>
+                      <Label htmlFor="nama-mk">{t("admin.courseName")}</Label>
                       <Input
                         id="nama-mk"
                         value={namaMataKuliah}
                         onChange={(e) => setNamaMataKuliah(e.target.value)}
-                        placeholder="contoh: Pemrograman Web"
                         required
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="sks">SKS</Label>
+                        <Label htmlFor="sks">{t("admin.credits")}</Label>
                         <Select value={sks.toString()} onValueChange={(val) => setSks(parseInt(val))}>
                           <SelectTrigger id="sks">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-card z-50">
                             {[1, 2, 3, 4, 5, 6].map((n) => (
                               <SelectItem key={n} value={n.toString()}>
-                                {n} SKS
+                                {n} {t("admin.credits")}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="semester">Semester</Label>
+                        <Label htmlFor="semester">{t("admin.semester")}</Label>
                         <Select value={semester.toString()} onValueChange={(val) => setSemester(parseInt(val))}>
                           <SelectTrigger id="semester">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-card z-50">
                             {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                               <SelectItem key={n} value={n.toString()}>
-                                Semester {n}
+                                {t("admin.semester")} {n}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -320,7 +325,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Menyimpan..." : editingMk ? "Perbarui" : "Simpan"}
+                      {loading ? t("admin.saving") : editingMk ? t("admin.update") : t("common.save")}
                     </Button>
                   </form>
                 </DialogContent>
@@ -331,11 +336,11 @@ const AdminDashboard = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Kode</TableHead>
-                  <TableHead>Nama Mata Kuliah</TableHead>
-                  <TableHead>SKS</TableHead>
-                  <TableHead>Semester</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+                  <TableHead>{t("mahasiswa.code")}</TableHead>
+                  <TableHead>{t("admin.courseName")}</TableHead>
+                  <TableHead>{t("admin.credits")}</TableHead>
+                  <TableHead>{t("admin.semester")}</TableHead>
+                  <TableHead className="text-right">{t("admin.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -343,9 +348,9 @@ const AdminDashboard = () => {
                   <TableRow key={mk.id}>
                     <TableCell className="font-medium">{mk.kode_mk}</TableCell>
                     <TableCell>{mk.nama_mata_kuliah}</TableCell>
-                    <TableCell>{mk.sks} SKS</TableCell>
+                    <TableCell>{mk.sks} {t("admin.credits")}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">Semester {mk.semester}</Badge>
+                      <Badge variant="outline">{t("admin.semester")} {mk.semester}</Badge>
                     </TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button
@@ -375,28 +380,28 @@ const AdminDashboard = () => {
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle>Daftar Pengguna</CardTitle>
-                <CardDescription>Kelola role pengguna</CardDescription>
+                <CardTitle>{t("admin.userList")}</CardTitle>
+                <CardDescription>{t("admin.manageUserRoles")}</CardDescription>
               </div>
               <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline">
                     <Users className="w-4 h-4 mr-2" />
-                    Tetapkan Role
+                    {t("admin.assignRole")}
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="bg-card z-50">
                   <DialogHeader>
-                    <DialogTitle>Tetapkan Role Pengguna</DialogTitle>
+                    <DialogTitle>{t("admin.assignUserRole")}</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleAssignRole} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="user-select">Pilih Pengguna</Label>
+                      <Label htmlFor="user-select">{t("admin.selectUser")}</Label>
                       <Select value={selectedUserId} onValueChange={setSelectedUserId}>
                         <SelectTrigger id="user-select">
-                          <SelectValue placeholder="Pilih pengguna" />
+                          <SelectValue placeholder={t("admin.selectUserPlaceholder")} />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-card z-50">
                           {users.map((user) => (
                             <SelectItem key={user.id} value={user.id}>
                               {user.nama_lengkap} ({user.email})
@@ -406,20 +411,20 @@ const AdminDashboard = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="role-select">Pilih Role</Label>
+                      <Label htmlFor="role-select">{t("admin.selectRole")}</Label>
                       <Select value={selectedRole} onValueChange={(val) => setSelectedRole(val as "admin" | "dosen" | "mahasiswa")}>
                         <SelectTrigger id="role-select">
-                          <SelectValue placeholder="Pilih role" />
+                          <SelectValue placeholder={t("admin.selectRolePlaceholder")} />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="dosen">Dosen</SelectItem>
-                          <SelectItem value="mahasiswa">Mahasiswa</SelectItem>
+                        <SelectContent className="bg-card z-50">
+                          <SelectItem value="admin">{t("admin.roleAdmin")}</SelectItem>
+                          <SelectItem value="dosen">{t("admin.roleDosen")}</SelectItem>
+                          <SelectItem value="mahasiswa">{t("admin.roleMahasiswa")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Menyimpan..." : "Tetapkan Role"}
+                      {loading ? t("admin.saving") : t("admin.assignRole")}
                     </Button>
                   </form>
                 </DialogContent>
@@ -430,10 +435,10 @@ const AdminDashboard = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nama</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>NIM/NIP</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead>{t("admin.name")}</TableHead>
+                  <TableHead>{t("auth.email")}</TableHead>
+                  <TableHead>{t("auth.nimNip")}</TableHead>
+                  <TableHead>{t("admin.role")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -453,10 +458,12 @@ const AdminDashboard = () => {
                               : "outline"
                           }
                         >
-                          {user.user_roles[0].role}
+                          {user.user_roles[0].role === "admin" && t("admin.roleAdmin")}
+                          {user.user_roles[0].role === "dosen" && t("admin.roleDosen")}
+                          {user.user_roles[0].role === "mahasiswa" && t("admin.roleMahasiswa")}
                         </Badge>
                       ) : (
-                        <Badge variant="destructive">Belum ada role</Badge>
+                        <Badge variant="destructive">{t("admin.noRole")}</Badge>
                       )}
                     </TableCell>
                   </TableRow>

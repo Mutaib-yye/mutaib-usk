@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +12,7 @@ import { toast } from "sonner";
 
 const MahasiswaDashboard = () => {
   const { signOut, profile, user } = useAuth();
+  const { t } = useLanguage();
   const [nilai, setNilai] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +36,7 @@ const MahasiswaDashboard = () => {
     setLoading(false);
 
     if (error) {
-      toast.error("Gagal memuat nilai");
+      toast.error(t("admin.saveFailed"));
     } else {
       setNilai(data || []);
     }
@@ -71,14 +74,17 @@ const MahasiswaDashboard = () => {
           <div className="flex items-center gap-3">
             <GraduationCap className="w-8 h-8" />
             <div>
-              <h1 className="text-xl font-bold">Universitas Syiah Kuala</h1>
-              <p className="text-sm opacity-90">Dashboard Mahasiswa</p>
+              <h1 className="text-xl font-bold">{t("university.name")}</h1>
+              <p className="text-sm opacity-90">{t("mahasiswa.dashboard")}</p>
             </div>
           </div>
-          <Button onClick={signOut} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-            <LogOut className="w-4 h-4 mr-2" />
-            Keluar
-          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageToggle />
+            <Button onClick={signOut} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <LogOut className="w-4 h-4 mr-2" />
+              {t("common.logout")}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -89,7 +95,7 @@ const MahasiswaDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <TrendingUp className="w-5 h-5 text-success" />
-                IPK
+                {t("mahasiswa.ipk")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -101,7 +107,7 @@ const MahasiswaDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <BookOpen className="w-5 h-5 text-primary" />
-                Total SKS
+                {t("mahasiswa.totalCredits")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -113,7 +119,7 @@ const MahasiswaDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Award className="w-5 h-5 text-accent" />
-                Mata Kuliah
+                {t("mahasiswa.courses")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -125,31 +131,31 @@ const MahasiswaDashboard = () => {
         {/* Nilai Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Transkrip Nilai</CardTitle>
-            <CardDescription>Daftar nilai mata kuliah yang telah Anda ambil</CardDescription>
+            <CardTitle>{t("mahasiswa.transcript")}</CardTitle>
+            <CardDescription>{t("mahasiswa.transcriptDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <p className="text-center text-muted-foreground py-8">Memuat data...</p>
+              <p className="text-center text-muted-foreground py-8">{t("common.loading")}</p>
             ) : nilai.length === 0 ? (
               <div className="text-center py-12">
                 <Award className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                <p className="text-xl font-semibold text-muted-foreground">Belum ada nilai</p>
+                <p className="text-xl font-semibold text-muted-foreground">{t("mahasiswa.noGrades")}</p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Nilai akan muncul setelah dosen menginput nilai Anda
+                  {t("mahasiswa.noGradesDesc")}
                 </p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Kode</TableHead>
-                    <TableHead>Mata Kuliah</TableHead>
-                    <TableHead>SKS</TableHead>
-                    <TableHead>Semester</TableHead>
-                    <TableHead>Dosen</TableHead>
-                    <TableHead>Nilai Angka</TableHead>
-                    <TableHead>Nilai Huruf</TableHead>
+                    <TableHead>{t("mahasiswa.code")}</TableHead>
+                    <TableHead>{t("mahasiswa.courseName")}</TableHead>
+                    <TableHead>{t("mahasiswa.credits")}</TableHead>
+                    <TableHead>{t("mahasiswa.semester")}</TableHead>
+                    <TableHead>{t("mahasiswa.lecturer")}</TableHead>
+                    <TableHead>{t("mahasiswa.gradeNumber")}</TableHead>
+                    <TableHead>{t("mahasiswa.gradeLetter")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -159,9 +165,9 @@ const MahasiswaDashboard = () => {
                         {n.mata_kuliah?.kode_mk}
                       </TableCell>
                       <TableCell>{n.mata_kuliah?.nama_mata_kuliah}</TableCell>
-                      <TableCell>{n.mata_kuliah?.sks} SKS</TableCell>
+                      <TableCell>{n.mata_kuliah?.sks} {t("admin.credits")}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">Semester {n.mata_kuliah?.semester}</Badge>
+                        <Badge variant="outline">{t("admin.semester")} {n.mata_kuliah?.semester}</Badge>
                       </TableCell>
                       <TableCell className="text-sm">
                         {n.dosen?.nama_lengkap}
@@ -196,7 +202,7 @@ const MahasiswaDashboard = () => {
         {/* Keterangan Nilai */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Keterangan Nilai</CardTitle>
+            <CardTitle className="text-base">{t("mahasiswa.gradeInfo")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
