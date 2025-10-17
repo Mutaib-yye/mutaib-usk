@@ -100,14 +100,18 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 via-background to-secondary/20 p-4">
+      <Card className="w-full max-w-md shadow-xl border-primary/20">
         <CardHeader className="text-center space-y-3">
-          <div className="mx-auto bg-primary rounded-full w-16 h-16 flex items-center justify-center">
-            <GraduationCap className="w-10 h-10 text-primary-foreground" />
+          <div className="mx-auto bg-primary rounded-full w-20 h-20 flex items-center justify-center shadow-lg">
+            <GraduationCap className="w-12 h-12 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-bold">Sistem Informasi Perkuliahan</CardTitle>
-          <CardDescription>Universitas XYZ</CardDescription>
+          <CardTitle className="text-2xl font-bold text-secondary">
+            Universitas Syiah Kuala
+          </CardTitle>
+          <CardDescription className="text-base font-medium">
+            Sistem Informasi Perkuliahan
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">

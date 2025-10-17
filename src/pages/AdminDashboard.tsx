@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Users, Plus, Edit, Trash2, LogOut } from "lucide-react";
+import { BookOpen, Users, Plus, Edit, Trash2, LogOut, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -196,20 +196,18 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
       {/* Header */}
-      <header className="bg-card border-b sticky top-0 z-10 shadow-sm">
+      <header className="bg-secondary text-secondary-foreground shadow-md sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="bg-primary rounded-lg p-2">
-              <BookOpen className="w-6 h-6 text-primary-foreground" />
-            </div>
+            <GraduationCap className="w-8 h-8" />
             <div>
-              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-              <p className="text-sm text-muted-foreground">Selamat datang, {profile?.nama_lengkap}</p>
+              <h1 className="text-xl font-bold">Universitas Syiah Kuala</h1>
+              <p className="text-sm opacity-90">Dashboard Admin</p>
             </div>
           </div>
-          <Button variant="outline" onClick={signOut}>
+          <Button onClick={signOut} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
             <LogOut className="w-4 h-4 mr-2" />
             Keluar
           </Button>
