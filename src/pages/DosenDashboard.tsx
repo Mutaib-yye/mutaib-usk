@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, GraduationCap, Plus, Edit, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Watermark } from "@/components/Watermark";
 
 const nilaiSchema = z.object({
   nilaiAngka: z.number().min(0).max(100),
@@ -168,9 +169,9 @@ const DosenDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+    <div className="min-h-screen gradient-bg relative">
       {/* Header */}
-      <header className="bg-secondary text-secondary-foreground shadow-md sticky top-0 z-10">
+      <header className="glass-header sticky top-0 z-20 text-secondary-foreground shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <GraduationCap className="w-8 h-8" />
@@ -192,7 +193,7 @@ const DosenDashboard = () => {
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
+          <Card className="card-hover border-accent/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <BookOpen className="w-5 h-5 text-accent" />
@@ -204,7 +205,7 @@ const DosenDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-hover border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <GraduationCap className="w-5 h-5 text-primary" />
@@ -216,7 +217,7 @@ const DosenDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-hover border-success/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Edit className="w-5 h-5 text-success" />
@@ -362,6 +363,7 @@ const DosenDashboard = () => {
           </CardContent>
         </Card>
       </main>
+      <Watermark />
     </div>
   );
 };

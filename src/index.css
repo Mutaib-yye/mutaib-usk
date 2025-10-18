@@ -93,3 +93,25 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30 shadow-xl;
+  }
+  
+  .glass-header {
+    @apply backdrop-blur-md bg-secondary/95 border-b border-white/10;
+  }
+  
+  .gradient-bg {
+    @apply bg-gradient-to-br from-primary/20 via-background to-secondary/20;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
+  }
+  
+  .watermark {
+    @apply text-xs text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors;
+  }
+}

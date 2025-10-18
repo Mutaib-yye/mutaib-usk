@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Loader2 } from "lucide-react";
+import { Watermark } from "@/components/Watermark";
 
 const Index = () => {
   const { user, userRole, loading, signOut } = useAuth();
@@ -43,7 +44,10 @@ const Index = () => {
   // Show message if user has no role
   if (!loading && user && !userRole) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/20 via-background to-secondary/20 p-4">
+      <div className="flex min-h-screen items-center justify-center gradient-bg p-4 relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-destructive/10 rounded-full blur-3xl animate-pulse" />
+        </div>
         <div className="absolute top-4 right-4">
           <LanguageToggle />
         </div>
@@ -61,12 +65,17 @@ const Index = () => {
             {t("common.logout")}
           </Button>
         </div>
+        <Watermark />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/20 via-background to-secondary/20">
+    <div className="flex min-h-screen items-center justify-center gradient-bg relative overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" />
+      </div>
       <div className="absolute top-4 right-4">
         <LanguageToggle />
       </div>
@@ -82,6 +91,7 @@ const Index = () => {
             {t("home.loadingApp")}
           </p>
         </div>
+        <Watermark />
       </div>
     </div>
   );

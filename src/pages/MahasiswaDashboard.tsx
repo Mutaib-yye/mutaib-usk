@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Award, TrendingUp, LogOut, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
+import { Watermark } from "@/components/Watermark";
 
 const MahasiswaDashboard = () => {
   const { signOut, profile, user } = useAuth();
@@ -67,9 +68,9 @@ const MahasiswaDashboard = () => {
   const totalSks = getTotalSks();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+    <div className="min-h-screen gradient-bg relative">
       {/* Header */}
-      <header className="bg-secondary text-secondary-foreground shadow-md sticky top-0 z-10">
+      <header className="glass-header sticky top-0 z-20 text-secondary-foreground shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <GraduationCap className="w-8 h-8" />
@@ -91,7 +92,7 @@ const MahasiswaDashboard = () => {
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="border-success">
+          <Card className="card-hover border-success/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <TrendingUp className="w-5 h-5 text-success" />
@@ -103,7 +104,7 @@ const MahasiswaDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-hover border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <BookOpen className="w-5 h-5 text-primary" />
@@ -115,7 +116,7 @@ const MahasiswaDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-hover border-accent/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Award className="w-5 h-5 text-accent" />
@@ -230,6 +231,7 @@ const MahasiswaDashboard = () => {
           </CardContent>
         </Card>
       </main>
+      <Watermark />
     </div>
   );
 };

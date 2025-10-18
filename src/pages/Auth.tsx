@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Watermark } from "@/components/Watermark";
 
 const loginSchema = z.object({
   email: z.string().trim().email({ message: "Email tidak valid" }),
@@ -103,12 +104,18 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 via-background to-secondary/20 p-4">
-      <div className="absolute top-4 right-4">
+    <div className="min-h-screen flex items-center justify-center gradient-bg p-4 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000" />
+      </div>
+      
+      <div className="absolute top-4 right-4 z-10">
         <LanguageToggle />
       </div>
       
-      <Card className="w-full max-w-md shadow-xl border-primary/20">
+      <Card className="w-full max-w-md glass-card border-primary/20 relative z-10 animate-fade-in">
         <CardHeader className="text-center space-y-3">
           <div className="mx-auto bg-primary rounded-full w-20 h-20 flex items-center justify-center shadow-lg">
             <GraduationCap className="w-12 h-12 text-primary-foreground" />
@@ -211,6 +218,7 @@ const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
+      <Watermark />
     </div>
   );
 };
