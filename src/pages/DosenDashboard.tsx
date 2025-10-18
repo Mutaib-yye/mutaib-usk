@@ -56,12 +56,18 @@ const DosenDashboard = () => {
       .from("profiles")
       .select(`
         *,
-        user_roles!inner(role)
-      `)
-      .eq("user_roles.role", "mahasiswa");
+        user_roles(role)
+      `);
 
     if (!error) {
-      setMahasiswa(data || []);
+      // Filter for mahasiswa role
+      const mahasiswaList = data?.filter(profile => 
+        profile.user_roles?.some((ur: any) => ur.role === "mahasiswa")
+      ) || [];
+      setMahasiswa(mahasiswaList);
+    } else {
+      console.error("Error fetching mahasiswa:", error);
+      toast.error(t("admin.saveFailed") + ": " + error.message);
     }
   };
 
@@ -78,7 +84,10 @@ const DosenDashboard = () => {
       `)
       .eq("dosen_id", user.id);
 
-    if (!error) {
+    if (error) {
+      console.error("Error fetching nilai:", error);
+      toast.error(t("admin.saveFailed") + ": " + error.message);
+    } else {
       setNilai(data || []);
     }
   };
