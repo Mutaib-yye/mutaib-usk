@@ -136,6 +136,20 @@ const DosenDashboard = () => {
         })
         .eq("id", editingNilai.id));
     } else {
+      // Check if grade already exists for this student-course combination
+      const { data: existing } = await supabase
+        .from("nilai")
+        .select("id")
+        .eq("mahasiswa_id", selectedMahasiswa)
+        .eq("mata_kuliah_id", selectedMataKuliah)
+        .maybeSingle();
+
+      if (existing) {
+        toast.error("Nilai untuk mahasiswa dan mata kuliah ini sudah ada. Silakan edit nilai yang sudah ada.");
+        setLoading(false);
+        return;
+      }
+
       ({ error } = await supabase
         .from("nilai")
         .insert([nilaiData]));

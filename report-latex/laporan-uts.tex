@@ -1,0 +1,1110 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[bahasa]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+\geometry{top=2.5cm, bottom=2.5cm, left=3cm, right=3cm}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    commentstyle=\color{green!50!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    showstringspaces=false
+}
+
+\title{\textbf{LAPORAN UTS\\MANAJEMEN DAN PEMODELAN DATA\\WEB APLIKASI SISTEM INFORMASI PERKULIAHAN}}
+\author{Nama: [NAMA ANDA]\\NIM: [NIM ANDA]\\Kelas: [KELAS ANDA]}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Laporan Komputer Server dan Web Server}
+
+\subsection{Spesifikasi Komputer/Server}
+
+\subsubsection{Hardware}
+\begin{itemize}
+    \item \textbf{Processor}: [Sebutkan processor yang digunakan]
+    \item \textbf{RAM}: [Sebutkan kapasitas RAM]
+    \item \textbf{Storage}: [Sebutkan kapasitas penyimpanan]
+    \item \textbf{Operating System}: [Sebutkan OS: Windows/Linux/MacOS]
+\end{itemize}
+
+\subsubsection{Software}
+\begin{itemize}
+    \item \textbf{Web Browser}: Google Chrome / Firefox / Safari
+    \item \textbf{Runtime Environment}: Node.js v18+
+    \item \textbf{Package Manager}: npm / bun
+    \item \textbf{Development Server}: Vite Development Server
+    \item \textbf{Database Server}: PostgreSQL 15+
+\end{itemize}
+
+\subsection{Konfigurasi Web Server}
+
+Aplikasi ini menggunakan \textbf{Vite} sebagai development server dan build tool. Vite adalah modern frontend build tool yang menyediakan:
+
+\begin{itemize}
+    \item \textbf{Hot Module Replacement (HMR)}: Update instan tanpa refresh halaman
+    \item \textbf{Port Default}: 5173 untuk development
+    \item \textbf{Production Build}: Static files yang di-deploy ke hosting
+\end{itemize}
+
+\textbf{Konfigurasi Koneksi}:
+\begin{lstlisting}[language=bash]
+# Development Mode
+npm run dev
+# Akses via: http://localhost:5173
+
+# Production Build
+npm run build
+# Deploy hasil build dari folder dist/
+\end{lstlisting}
+
+\subsection{Diagram Alur Komunikasi Client-Server}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=2cm,
+    box/.style={rectangle, draw, fill=blue!20, text width=3cm, text centered, rounded corners, minimum height=1.2cm},
+    arrow/.style={->, >=stealth, thick}
+]
+    \node[box] (client) {Client Browser};
+    \node[box, right=of client] (vite) {Vite Server};
+    \node[box, below=of vite] (api) {REST API};
+    \node[box, right=of api] (db) {PostgreSQL Database};
+    
+    \draw[arrow] (client) -- node[above] {HTTP Request} (vite);
+    \draw[arrow] (vite) -- node[right] {API Call} (api);
+    \draw[arrow] (api) -- node[above] {SQL Query} (db);
+    \draw[arrow] (db) -- node[below] {Data} (api);
+    \draw[arrow] (api) -- node[left] {JSON Response} (vite);
+    \draw[arrow] (vite) -- node[below] {HTML/JS/CSS} (client);
+\end{tikzpicture}
+\caption{Diagram Komunikasi Client-Server}
+\end{figure}
+
+\textbf{[Tambahkan screenshot konfigurasi server atau terminal saat menjalankan aplikasi]}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering [SPACE FOR SCREENSHOT]\\\vspace{3cm}}}
+\caption{Screenshot Server Running}
+\end{figure}
+
+\newpage
+\section{Laporan Bahasa Pemrograman Web}
+
+\subsection{Stack Teknologi}
+
+Aplikasi ini dibangun menggunakan teknologi modern:
+
+\begin{itemize}
+    \item \textbf{Frontend Framework}: React 18 dengan TypeScript
+    \item \textbf{Styling}: Tailwind CSS untuk responsive design
+    \item \textbf{UI Components}: Radix UI dan shadcn/ui
+    \item \textbf{State Management}: React Hooks (useState, useEffect, useContext)
+    \item \textbf{Routing}: React Router v6
+    \item \textbf{Backend}: PostgreSQL dengan REST API
+    \item \textbf{Authentication}: JWT-based authentication
+    \item \textbf{Form Validation}: Zod schema validation
+\end{itemize}
+
+\subsection{Peran Framework dalam Aplikasi}
+
+\textbf{React} berperan sebagai:
+\begin{enumerate}
+    \item Component-based architecture untuk reusability
+    \item Virtual DOM untuk performa optimal
+    \item State management untuk data flow
+    \item Hook system untuk logic reuse
+\end{enumerate}
+
+\textbf{TypeScript} menyediakan:
+\begin{enumerate}
+    \item Type safety untuk menghindari runtime errors
+    \item Better IDE support dan autocomplete
+    \item Interface definition untuk data structures
+\end{enumerate}
+
+\subsection{Contoh Kode CRUD Utama}
+
+\subsubsection{Create - Input Nilai (DosenDashboard.tsx)}
+
+\begin{lstlisting}[language=JavaScript]
+const handleSaveNilai = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // Validation
+  const result = nilaiSchema.safeParse({ nilaiAngka });
+  if (!result.success) {
+    toast.error("Nilai harus antara 0-100");
+    return;
+  }
+  
+  // Check duplicate
+  const { data: existing } = await supabase
+    .from("nilai")
+    .select("id")
+    .eq("mahasiswa_id", selectedMahasiswa)
+    .eq("mata_kuliah_id", selectedMataKuliah)
+    .maybeSingle();
+    
+  if (existing) {
+    toast.error("Nilai sudah ada");
+    return;
+  }
+  
+  // Insert data
+  const { error } = await supabase
+    .from("nilai")
+    .insert([{
+      mahasiswa_id: selectedMahasiswa,
+      mata_kuliah_id: selectedMataKuliah,
+      dosen_id: user?.id,
+      nilai_angka: nilaiAngka,
+      nilai_huruf: hitungNilaiHuruf(nilaiAngka)
+    }]);
+    
+  if (error) {
+    toast.error("Gagal menyimpan: " + error.message);
+  } else {
+    toast.success("Berhasil menyimpan nilai");
+    fetchNilai();
+  }
+};
+\end{lstlisting}
+
+\subsubsection{Read - Fetch Data Nilai}
+
+\begin{lstlisting}[language=JavaScript]
+const fetchNilai = async () => {
+  const { data, error } = await supabase
+    .from("nilai")
+    .select(`
+      *,
+      mahasiswa:profiles!nilai_mahasiswa_id_fkey(
+        id, nama_lengkap, nim_nip
+      ),
+      mata_kuliah:mata_kuliah(
+        id, kode_mk, nama_mata_kuliah, sks
+      ),
+      dosen:profiles!nilai_dosen_id_fkey(
+        id, nama_lengkap
+      )
+    `)
+    .eq("dosen_id", user.id);
+    
+  if (!error) {
+    setNilai(data || []);
+  }
+};
+\end{lstlisting}
+
+\subsubsection{Update - Edit Nilai}
+
+\begin{lstlisting}[language=JavaScript]
+const handleUpdateNilai = async () => {
+  const { error } = await supabase
+    .from("nilai")
+    .update({
+      nilai_angka: nilaiAngka,
+      nilai_huruf: hitungNilaiHuruf(nilaiAngka),
+    })
+    .eq("id", editingNilai.id);
+    
+  if (!error) {
+    toast.success("Nilai berhasil diupdate");
+    fetchNilai();
+  }
+};
+\end{lstlisting}
+
+\subsubsection{Delete - Hapus Data (AdminDashboard.tsx)}
+
+\begin{lstlisting}[language=JavaScript]
+const handleDeleteMataKuliah = async (id: string) => {
+  const { error } = await supabase
+    .from("mata_kuliah")
+    .delete()
+    .eq("id", id);
+    
+  if (error) {
+    toast.error("Gagal menghapus");
+  } else {
+    toast.success("Berhasil dihapus");
+    fetchMataKuliah();
+  }
+};
+\end{lstlisting}
+
+\subsection{Struktur Folder dan File Proyek}
+
+\begin{lstlisting}[language=bash]
+project-root/
+|-- public/                    # Static assets
+|   |-- robots.txt
+|   |-- favicon.ico
+|
+|-- src/
+|   |-- components/           # Reusable components
+|   |   |-- ui/              # UI component library
+|   |   |   |-- button.tsx
+|   |   |   |-- card.tsx
+|   |   |   |-- dialog.tsx
+|   |   |   |-- table.tsx
+|   |   |   |-- ... (30+ components)
+|   |   |-- LanguageToggle.tsx
+|   |   |-- ProtectedRoute.tsx
+|   |   |-- Watermark.tsx
+|   |
+|   |-- contexts/            # React contexts
+|   |   |-- LanguageContext.tsx
+|   |
+|   |-- hooks/               # Custom hooks
+|   |   |-- useAuth.tsx
+|   |   |-- use-toast.ts
+|   |   |-- use-mobile.tsx
+|   |
+|   |-- pages/               # Main page components
+|   |   |-- Index.tsx        # Landing page
+|   |   |-- Auth.tsx         # Login/Register
+|   |   |-- AdminDashboard.tsx
+|   |   |-- DosenDashboard.tsx
+|   |   |-- MahasiswaDashboard.tsx
+|   |   |-- NotFound.tsx
+|   |
+|   |-- integrations/        # Backend integration
+|   |   |-- supabase/
+|   |       |-- client.ts    # Database client
+|   |       |-- types.ts     # TypeScript types
+|   |
+|   |-- lib/                 # Utility functions
+|   |   |-- utils.ts
+|   |
+|   |-- App.tsx              # Root component
+|   |-- main.tsx             # Entry point
+|   |-- index.css            # Global styles
+|   |-- vite-env.d.ts        # Vite types
+|
+|-- supabase/
+|   |-- migrations/          # Database migrations
+|   |-- config.toml          # Supabase config
+|
+|-- index.html               # HTML template
+|-- package.json             # Dependencies
+|-- tsconfig.json            # TypeScript config
+|-- tailwind.config.ts       # Tailwind config
+|-- vite.config.ts           # Vite config
+\end{lstlisting}
+
+\textbf{[Tambahkan screenshot struktur folder dari IDE/Editor]}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering [SPACE FOR SCREENSHOT]\\\vspace{4cm}}}
+\caption{Screenshot Struktur Folder Proyek}
+\end{figure}
+
+\newpage
+\section{Laporan Database Server (RDBMS)}
+
+\subsection{Jenis Sistem Database}
+
+Aplikasi ini menggunakan \textbf{PostgreSQL 15+} sebagai RDBMS dengan alasan:
+
+\begin{itemize}
+    \item Open-source dan gratis
+    \item Mendukung ACID compliance
+    \item Performa tinggi untuk query kompleks
+    \item Mendukung JSON data type
+    \item Row Level Security (RLS) untuk keamanan
+    \item Rich indexing dan constraint support
+\end{itemize}
+
+\subsection{Struktur Tabel dalam Database}
+
+Database terdiri dari 4 tabel utama:
+
+\begin{enumerate}
+    \item \textbf{profiles} - Menyimpan data profil pengguna
+    \item \textbf{user\_roles} - Menyimpan role pengguna (admin/dosen/mahasiswa)
+    \item \textbf{mata\_kuliah} - Menyimpan data mata kuliah
+    \item \textbf{nilai} - Menyimpan data nilai mahasiswa
+\end{enumerate}
+
+\subsection{Detail Struktur Tabel}
+
+\subsubsection{Tabel: profiles}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Column} & \textbf{Type} & \textbf{Nullable} & \textbf{Default} \\
+\hline
+id & uuid & NO & - \\
+email & text & NO & - \\
+nama\_lengkap & text & NO & - \\
+nim\_nip & text & YES & NULL \\
+created\_at & timestamp & YES & now() \\
+updated\_at & timestamp & YES & now() \\
+\hline
+\end{tabular}
+\caption{Struktur Tabel profiles}
+\end{table}
+
+\textbf{Primary Key}: id (references auth.users.id)
+
+\subsubsection{Tabel: user\_roles}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Column} & \textbf{Type} & \textbf{Nullable} & \textbf{Default} \\
+\hline
+id & uuid & NO & gen\_random\_uuid() \\
+user\_id & uuid & NO & - \\
+role & app\_role (enum) & NO & - \\
+created\_at & timestamp & YES & now() \\
+\hline
+\end{tabular}
+\caption{Struktur Tabel user\_roles}
+\end{table}
+
+\textbf{Primary Key}: id\\
+\textbf{Foreign Key}: user\_id → profiles.id\\
+\textbf{Unique Constraint}: (user\_id, role)\\
+\textbf{Enum Values}: 'admin', 'dosen', 'mahasiswa'
+
+\subsubsection{Tabel: mata\_kuliah}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Column} & \textbf{Type} & \textbf{Nullable} & \textbf{Default} \\
+\hline
+id & uuid & NO & gen\_random\_uuid() \\
+kode\_mk & text & NO & - \\
+nama\_mata\_kuliah & text & NO & - \\
+sks & integer & NO & - \\
+semester & integer & NO & - \\
+created\_at & timestamp & YES & now() \\
+updated\_at & timestamp & YES & now() \\
+\hline
+\end{tabular}
+\caption{Struktur Tabel mata\_kuliah}
+\end{table}
+
+\textbf{Primary Key}: id\\
+\textbf{Unique Constraint}: kode\_mk
+
+\subsubsection{Tabel: nilai}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Column} & \textbf{Type} & \textbf{Nullable} & \textbf{Default} \\
+\hline
+id & uuid & NO & gen\_random\_uuid() \\
+mahasiswa\_id & uuid & NO & - \\
+mata\_kuliah\_id & uuid & NO & - \\
+dosen\_id & uuid & NO & - \\
+nilai\_angka & numeric & YES & NULL \\
+nilai\_huruf & text & YES & NULL \\
+created\_at & timestamp & YES & now() \\
+updated\_at & timestamp & YES & now() \\
+\hline
+\end{tabular}
+\caption{Struktur Tabel nilai}
+\end{table}
+
+\textbf{Primary Key}: id\\
+\textbf{Foreign Keys}:
+\begin{itemize}
+    \item mahasiswa\_id → profiles.id
+    \item mata\_kuliah\_id → mata\_kuliah.id
+    \item dosen\_id → profiles.id
+\end{itemize}
+\textbf{Unique Constraint}: (mahasiswa\_id, mata\_kuliah\_id)
+
+\newpage
+\section{Laporan Relational Database, SQL, dan Normalisasi}
+
+\subsection{Entity Relationship Diagram (ERD)}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    entity/.style={rectangle, draw, fill=blue!20, text width=3cm, text centered, minimum height=1cm},
+    relationship/.style={diamond, draw, fill=green!20, text width=2cm, text centered, aspect=2},
+    attribute/.style={ellipse, draw, fill=yellow!20, text centered},
+    node distance=3cm
+]
+    % Entities
+    \node[entity] (profiles) {profiles};
+    \node[entity, right=of profiles] (roles) {user\_roles};
+    \node[entity, below=of profiles] (nilai) {nilai};
+    \node[entity, right=of nilai] (mk) {mata\_kuliah};
+    
+    % Relationships
+    \draw[->, thick] (profiles) -- node[above] {1:N} (roles);
+    \draw[->, thick] (profiles) -- node[left] {1:N} (nilai);
+    \draw[->, thick] (mk) -- node[above] {1:N} (nilai);
+    
+    % Labels
+    \node[above=0.3cm of profiles] {User Profile};
+    \node[above=0.3cm of roles] {User Roles};
+    \node[below=0.3cm of nilai] {Student Grades};
+    \node[above=0.3cm of mk] {Courses};
+\end{tikzpicture}
+\caption{Entity Relationship Diagram}
+\end{figure}
+
+\textbf{[Tambahkan diagram ERD yang lebih detail jika diperlukan]}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering [SPACE FOR DETAILED ERD DIAGRAM]\\\vspace{5cm}}}
+\caption{Detailed ERD with Attributes}
+\end{figure}
+
+\subsection{Proses Normalisasi}
+
+\subsubsection{Bentuk Tidak Normal (Unnormalized Form)}
+
+Data awal sebelum normalisasi mungkin terlihat seperti:
+
+\begin{verbatim}
+mahasiswa_data(nim, nama, email, mata_kuliah_list, 
+               nilai_list, dosen_list, sks_list)
+\end{verbatim}
+
+Masalah: Data redundan, update anomaly, insertion anomaly
+
+\subsubsection{First Normal Form (1NF)}
+
+Eliminasi repeating groups dan pastikan atomicity:
+
+\begin{itemize}
+    \item Setiap kolom hanya berisi nilai atomic
+    \item Tidak ada repeating groups
+    \item Setiap tabel memiliki primary key
+\end{itemize}
+
+\textbf{Hasil}:
+\begin{verbatim}
+profiles(id, email, nama_lengkap, nim_nip)
+nilai(id, mahasiswa_id, mata_kuliah_id, 
+      dosen_id, nilai_angka, nilai_huruf)
+\end{verbatim}
+
+\subsubsection{Second Normal Form (2NF)}
+
+Eliminasi partial dependencies:
+
+\begin{itemize}
+    \item Sudah dalam 1NF
+    \item Semua non-key attributes fully dependent pada primary key
+    \item Tidak ada partial dependency
+\end{itemize}
+
+\textbf{Hasil}: Pisahkan data mata kuliah ke tabel sendiri:
+\begin{verbatim}
+mata_kuliah(id, kode_mk, nama_mata_kuliah, sks, semester)
+\end{verbatim}
+
+\subsubsection{Third Normal Form (3NF)}
+
+Eliminasi transitive dependencies:
+
+\begin{itemize}
+    \item Sudah dalam 2NF
+    \item Tidak ada transitive dependencies
+    \item Setiap non-key attribute hanya bergantung pada primary key
+\end{itemize}
+
+\textbf{Hasil}: Pisahkan role ke tabel terpisah:
+\begin{verbatim}
+user_roles(id, user_id, role)
+\end{verbatim}
+
+\textbf{Keuntungan Normalisasi}:
+\begin{enumerate}
+    \item Mengurangi redundansi data
+    \item Meningkatkan integritas data
+    \item Memudahkan maintenance
+    \item Menghindari anomali insert, update, delete
+\end{enumerate}
+
+\subsection{Contoh Query SQL}
+
+\subsubsection{SELECT dengan JOIN}
+
+\begin{lstlisting}[language=SQL]
+-- Mengambil data nilai lengkap dengan informasi mahasiswa,
+-- mata kuliah, dan dosen
+SELECT 
+    n.id,
+    n.nilai_angka,
+    n.nilai_huruf,
+    m.nama_lengkap AS nama_mahasiswa,
+    m.nim_nip,
+    mk.kode_mk,
+    mk.nama_mata_kuliah,
+    mk.sks,
+    d.nama_lengkap AS nama_dosen
+FROM nilai n
+INNER JOIN profiles m ON n.mahasiswa_id = m.id
+INNER JOIN mata_kuliah mk ON n.mata_kuliah_id = mk.id
+INNER JOIN profiles d ON n.dosen_id = d.id
+WHERE m.id = 'mahasiswa-uuid-here'
+ORDER BY mk.semester, mk.nama_mata_kuliah;
+\end{lstlisting}
+
+\subsubsection{INSERT}
+
+\begin{lstlisting}[language=SQL]
+-- Insert nilai baru
+INSERT INTO nilai (
+    mahasiswa_id, 
+    mata_kuliah_id, 
+    dosen_id, 
+    nilai_angka, 
+    nilai_huruf
+)
+VALUES (
+    'mahasiswa-uuid',
+    'mata-kuliah-uuid',
+    'dosen-uuid',
+    85.5,
+    'A'
+);
+\end{lstlisting}
+
+\subsubsection{UPDATE}
+
+\begin{lstlisting}[language=SQL]
+-- Update nilai mahasiswa
+UPDATE nilai
+SET 
+    nilai_angka = 90,
+    nilai_huruf = 'A',
+    updated_at = NOW()
+WHERE 
+    id = 'nilai-uuid'
+    AND dosen_id = 'dosen-uuid';
+\end{lstlisting}
+
+\subsubsection{DELETE}
+
+\begin{lstlisting}[language=SQL]
+-- Hapus mata kuliah (hanya admin)
+DELETE FROM mata_kuliah
+WHERE id = 'mata-kuliah-uuid';
+\end{lstlisting}
+
+\subsubsection{Aggregate Functions}
+
+\begin{lstlisting}[language=SQL]
+-- Hitung IPK mahasiswa
+SELECT 
+    m.id,
+    m.nama_lengkap,
+    ROUND(
+        SUM(
+            CASE n.nilai_huruf
+                WHEN 'A' THEN 4.0 * mk.sks
+                WHEN 'B' THEN 3.0 * mk.sks
+                WHEN 'C' THEN 2.0 * mk.sks
+                WHEN 'D' THEN 1.0 * mk.sks
+                ELSE 0
+            END
+        ) / NULLIF(SUM(mk.sks), 0),
+        2
+    ) AS ipk
+FROM profiles m
+LEFT JOIN nilai n ON m.id = n.mahasiswa_id
+LEFT JOIN mata_kuliah mk ON n.mata_kuliah_id = mk.id
+WHERE m.id = 'mahasiswa-uuid'
+GROUP BY m.id, m.nama_lengkap;
+\end{lstlisting}
+
+\subsubsection{Complex JOIN dengan Filtering}
+
+\begin{lstlisting}[language=SQL]
+-- Ambil semua mahasiswa yang mengambil mata kuliah tertentu
+-- beserta nilainya
+SELECT 
+    p.nama_lengkap,
+    p.nim_nip,
+    n.nilai_angka,
+    n.nilai_huruf,
+    mk.nama_mata_kuliah
+FROM profiles p
+INNER JOIN user_roles ur ON p.id = ur.user_id
+INNER JOIN nilai n ON p.id = n.mahasiswa_id
+INNER JOIN mata_kuliah mk ON n.mata_kuliah_id = mk.id
+WHERE 
+    ur.role = 'mahasiswa'
+    AND mk.kode_mk = 'IF101'
+ORDER BY n.nilai_angka DESC;
+\end{lstlisting}
+
+\newpage
+\section{Laporan Implementasi Lokal Web Aplikasi}
+
+\subsection{Struktur Folder Lokal Proyek}
+
+Proyek disimpan di direktori lokal dengan struktur sebagai berikut:
+
+\begin{lstlisting}[language=bash]
+C:/Users/[Username]/projects/sistem-informasi-perkuliahan/
+atau
+/home/[username]/projects/sistem-informasi-perkuliahan/
+\end{lstlisting}
+
+\subsection{Langkah Menjalankan Aplikasi Lokal}
+
+\subsubsection{Persiapan Environment}
+
+\begin{enumerate}
+    \item \textbf{Install Dependencies}
+    \begin{lstlisting}[language=bash]
+# Pastikan Node.js sudah terinstall (v18+)
+node --version
+
+# Install dependencies
+npm install
+# atau
+bun install
+    \end{lstlisting}
+    
+    \item \textbf{Konfigurasi Environment Variables}
+    
+    File \texttt{.env} sudah dikonfigurasi otomatis dengan:
+    \begin{lstlisting}
+VITE_SUPABASE_URL=your-project-url
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+    \end{lstlisting}
+    
+    \item \textbf{Setup Database}
+    
+    Database sudah dikonfigurasi dengan migrations di folder \texttt{supabase/migrations/}
+\end{enumerate}
+
+\subsubsection{Menjalankan Development Server}
+
+\begin{lstlisting}[language=bash]
+# Start development server
+npm run dev
+
+# Server akan berjalan di:
+# http://localhost:5173
+\end{lstlisting}
+
+\subsection{Screenshot Halaman Aplikasi}
+
+\subsubsection{Halaman Login}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering [SPACE FOR SCREENSHOT - LOGIN PAGE]\\\vspace{5cm}}}
+\caption{Halaman Login}
+\end{figure}
+
+\subsubsection{Dashboard Admin}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering [SPACE FOR SCREENSHOT - ADMIN DASHBOARD]\\\vspace{5cm}}}
+\caption{Dashboard Admin - Kelola Mata Kuliah dan User}
+\end{figure}
+
+\subsubsection{Dashboard Dosen}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering [SPACE FOR SCREENSHOT - DOSEN DASHBOARD]\\\vspace{5cm}}}
+\caption{Dashboard Dosen - Input Nilai}
+\end{figure}
+
+\subsubsection{Dashboard Mahasiswa}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering [SPACE FOR SCREENSHOT - MAHASISWA DASHBOARD]\\\vspace{5cm}}}
+\caption{Dashboard Mahasiswa - Lihat Transkrip Nilai}
+\end{figure}
+
+\subsection{Penjelasan Alur Fungsi Sistem}
+
+\subsubsection{Alur Admin}
+
+\begin{enumerate}
+    \item Login dengan akun admin (rathermutaib333@gmail.com)
+    \item Mengelola data mata kuliah:
+    \begin{itemize}
+        \item Tambah mata kuliah baru
+        \item Edit data mata kuliah
+        \item Hapus mata kuliah
+    \end{itemize}
+    \item Mengelola user:
+    \begin{itemize}
+        \item Lihat semua user
+        \item Assign role (admin/dosen/mahasiswa)
+        \item Update profile user
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Alur Dosen}
+
+\begin{enumerate}
+    \item Login dengan akun dosen
+    \item Melihat daftar mata kuliah yang tersedia
+    \item Melihat daftar mahasiswa
+    \item Input nilai mahasiswa:
+    \begin{itemize}
+        \item Pilih mahasiswa
+        \item Pilih mata kuliah
+        \item Input nilai angka (0-100)
+        \item Sistem otomatis menghitung nilai huruf
+    \end{itemize}
+    \item Edit nilai yang sudah diinput
+    \item Lihat statistik nilai yang telah diinput
+\end{enumerate}
+
+\subsubsection{Alur Mahasiswa}
+
+\begin{enumerate}
+    \item Login dengan akun mahasiswa
+    \item Melihat transkrip nilai:
+    \begin{itemize}
+        \item Daftar mata kuliah yang diambil
+        \item Nilai angka dan huruf
+        \item SKS per mata kuliah
+        \item Nama dosen pengampu
+    \end{itemize}
+    \item Melihat statistik akademik:
+    \begin{itemize}
+        \item Total SKS diambil
+        \item IPK (Indeks Prestasi Kumulatif)
+        \item Jumlah mata kuliah
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Kendala Teknis dan Solusi}
+
+\subsubsection{Kendala 1: Duplicate Entry}
+
+\textbf{Problem}: Error "duplicate key value violates unique constraint" saat input nilai
+
+\textbf{Solusi}: Implementasi checking sebelum insert:
+\begin{lstlisting}[language=JavaScript]
+const { data: existing } = await supabase
+  .from("nilai")
+  .select("id")
+  .eq("mahasiswa_id", selectedMahasiswa)
+  .eq("mata_kuliah_id", selectedMataKuliah)
+  .maybeSingle();
+
+if (existing) {
+  toast.error("Nilai sudah ada");
+  return;
+}
+\end{lstlisting}
+
+\subsubsection{Kendala 2: Role-Based Access Control}
+
+\textbf{Problem}: User bisa mengakses halaman yang bukan haknya
+
+\textbf{Solusi}: Implementasi Protected Route dan Row Level Security (RLS)
+
+\subsubsection{Kendala 3: Multilingual Support}
+
+\textbf{Problem}: Aplikasi perlu mendukung dua bahasa (Bahasa Indonesia dan English)
+
+\textbf{Solusi}: Implementasi Context API untuk language management
+
+\newpage
+\section{Hasil Web Aplikasi}
+
+\subsection{Deployment Information}
+
+Aplikasi dapat dijalankan dalam dua mode:
+
+\subsubsection{Mode Localhost (Development)}
+
+\begin{itemize}
+    \item \textbf{URL}: http://localhost:5173
+    \item \textbf{Server}: Vite Development Server
+    \item \textbf{Hot Reload}: Enabled
+    \item \textbf{Debug Mode}: Enabled
+\end{itemize}
+
+\subsubsection{Mode Production (Optional)}
+
+\begin{itemize}
+    \item Build production: \texttt{npm run build}
+    \item Deploy ke hosting (Vercel, Netlify, dll)
+    \item Optimized bundle
+    \item Minified code
+\end{itemize}
+
+\subsection{Fitur Utama Aplikasi}
+
+\subsubsection{Authentication System}
+
+\begin{itemize}
+    \item Login dengan email dan password
+    \item Register akun baru
+    \item Auto-assign role admin untuk email tertentu
+    \item JWT-based session management
+    \item Logout functionality
+\end{itemize}
+
+\subsubsection{Role-Based Dashboard}
+
+\textbf{Admin Dashboard}:
+\begin{itemize}
+    \item CRUD mata kuliah
+    \item Manage user roles
+    \item View statistics
+    \item Bilingual interface
+\end{itemize}
+
+\textbf{Dosen Dashboard}:
+\begin{itemize}
+    \item Input dan edit nilai mahasiswa
+    \item View daftar mahasiswa
+    \item View daftar mata kuliah
+    \item Grade calculation (A-E)
+\end{itemize}
+
+\textbf{Mahasiswa Dashboard}:
+\begin{itemize}
+    \item View transkrip nilai
+    \item Calculate IPK
+    \item View course details
+    \item View lecturer information
+\end{itemize}
+
+\subsection{Teknologi dan Keamanan}
+
+\subsubsection{Security Features}
+
+\begin{enumerate}
+    \item \textbf{Row Level Security (RLS)}:
+    \begin{itemize}
+        \item Mahasiswa hanya bisa lihat nilai sendiri
+        \item Dosen hanya bisa edit nilai yang diinput sendiri
+        \item Admin bisa akses semua data
+    \end{itemize}
+    
+    \item \textbf{Authentication}:
+    \begin{itemize}
+        \item Secure password hashing
+        \item JWT token validation
+        \item Protected routes
+    \end{itemize}
+    
+    \item \textbf{Input Validation}:
+    \begin{itemize}
+        \item Zod schema validation
+        \item Type-safe TypeScript
+        \item Constraint checking
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Performance Optimization}
+
+\begin{itemize}
+    \item React component memoization
+    \item Lazy loading
+    \item Efficient database queries with proper indexes
+    \item Tailwind CSS for optimized styling
+\end{itemize}
+
+\subsection{Testing dan Quality Assurance}
+
+\begin{enumerate}
+    \item \textbf{Functional Testing}:
+    \begin{itemize}
+        \item Login/logout functionality
+        \item CRUD operations
+        \item Role-based access
+        \item Grade calculations
+    \end{itemize}
+    
+    \item \textbf{UI/UX Testing}:
+    \begin{itemize}
+        \item Responsive design (mobile, tablet, desktop)
+        \item Language toggle functionality
+        \item Toast notifications
+        \item Form validations
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Screenshot Aplikasi Berjalan}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering [SPACE FOR SCREENSHOT - APP RUNNING]\\\vspace{4cm}}}
+\caption{Screenshot Aplikasi Berjalan di Browser}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering [SPACE FOR SCREENSHOT - RESPONSIVE VIEW]\\\vspace{4cm}}}
+\caption{Screenshot Responsive View (Mobile)}
+\end{figure}
+
+\newpage
+\section{Kesimpulan}
+
+Sistem Informasi Perkuliahan ini berhasil diimplementasikan dengan fitur-fitur lengkap:
+
+\begin{enumerate}
+    \item \textbf{Multi-role System}: Admin, Dosen, dan Mahasiswa dengan hak akses berbeda
+    \item \textbf{CRUD Operations}: Create, Read, Update, Delete untuk semua entitas
+    \item \textbf{Secure}: Row Level Security dan authentication system
+    \item \textbf{User-friendly}: Modern UI dengan glassmorphism design
+    \item \textbf{Multilingual}: Support Bahasa Indonesia dan English
+    \item \textbf{Scalable}: Arsitektur yang dapat dikembangkan lebih lanjut
+\end{enumerate}
+
+\subsection{Future Improvements}
+
+\begin{itemize}
+    \item Export transkrip ke PDF
+    \item Email notifications
+    \item Advanced reporting dan analytics
+    \item Attendance tracking
+    \item Online assignment submission
+\end{itemize}
+
+\newpage
+\appendix
+\section{Lampiran}
+
+\subsection{Database Schema SQL}
+
+File lengkap database schema tersedia di \texttt{database-schema.sql}
+
+\subsection{Environment Setup Guide}
+
+Panduan lengkap setup environment:
+
+\begin{lstlisting}[language=bash]
+# 1. Install Node.js (v18 or higher)
+# Download dari: https://nodejs.org
+
+# 2. Clone atau extract project
+cd sistem-informasi-perkuliahan
+
+# 3. Install dependencies
+npm install
+
+# 4. Setup environment variables
+# .env file sudah dikonfigurasi otomatis
+
+# 5. Run development server
+npm run dev
+
+# 6. Build for production
+npm run build
+\end{lstlisting}
+
+\subsection{Kode Sumber Penting}
+
+\subsubsection{Authentication Hook (useAuth.tsx)}
+\begin{lstlisting}[language=JavaScript]
+// Custom hook untuk authentication
+export const useAuth = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
+
+  return { user, loading, signOut };
+};
+\end{lstlisting}
+
+\subsubsection{Grade Calculation Logic}
+\begin{lstlisting}[language=JavaScript]
+const hitungNilaiHuruf = (angka: number): string => {
+  if (angka >= 85) return "A";
+  if (angka >= 70) return "B";
+  if (angka >= 55) return "C";
+  if (angka >= 40) return "D";
+  return "E";
+};
+
+const hitungIPK = (nilaiList: any[]): number => {
+  if (!nilaiList.length) return 0;
+  
+  let totalBobot = 0;
+  let totalSKS = 0;
+  
+  nilaiList.forEach(n => {
+    const sks = n.mata_kuliah.sks;
+    let bobot = 0;
+    
+    switch(n.nilai_huruf) {
+      case 'A': bobot = 4.0; break;
+      case 'B': bobot = 3.0; break;
+      case 'C': bobot = 2.0; break;
+      case 'D': bobot = 1.0; break;
+      default: bobot = 0;
+    }
+    
+    totalBobot += bobot * sks;
+    totalSKS += sks;
+  });
+  
+  return totalSKS > 0 ? totalBobot / totalSKS : 0;
+};
+\end{lstlisting}
+
+\end{document}
