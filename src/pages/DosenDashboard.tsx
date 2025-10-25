@@ -139,15 +139,23 @@ const DosenDashboard = () => {
       // Check if grade already exists for this student-course combination
       const { data: existing } = await supabase
         .from("nilai")
-        .select("id")
+        .select("id, dosen_id")
         .eq("mahasiswa_id", selectedMahasiswa)
         .eq("mata_kuliah_id", selectedMataKuliah)
         .maybeSingle();
 
       if (existing) {
-        toast.error("Nilai untuk mahasiswa dan mata kuliah ini sudah ada. Silakan edit nilai yang sudah ada.");
-        setLoading(false);
-        return;
+        if (existing.dosen_id === user?.id) {
+          // Current dosen already entered this grade, allow them to edit
+          toast.error("Anda sudah memasukkan nilai ini. Silakan edit nilai yang ada.");
+          setLoading(false);
+          return;
+        } else {
+          // Another dosen entered this grade
+          toast.error("Nilai untuk mahasiswa ini sudah diinput oleh dosen lain.");
+          setLoading(false);
+          return;
+        }
       }
 
       ({ error } = await supabase
