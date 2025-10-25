@@ -116,6 +116,18 @@ const Auth = () => {
       </div>
       
       <Card className="w-full max-w-md glass-card border-primary/20 relative z-10 animate-fade-in">
+        {/* Watermark */}
+        <div className="absolute top-3 right-3 text-xs text-muted-foreground/60 font-light tracking-wide">
+          <div className="flex flex-col items-end gap-0.5">
+            <span className="text-[10px]">Made by</span>
+            <span className="font-medium text-primary/70">Mutaib Bin Mehraj Rather</span>
+            <span className="text-[9px] flex items-center gap-1">
+              <GraduationCap className="w-3 h-3" />
+              USK © 2025
+            </span>
+          </div>
+        </div>
+        
         <CardHeader className="text-center space-y-3">
           <div className="mx-auto bg-primary rounded-full w-20 h-20 flex items-center justify-center shadow-lg">
             <GraduationCap className="w-12 h-12 text-primary-foreground" />
